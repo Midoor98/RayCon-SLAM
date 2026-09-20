@@ -1,4 +1,4 @@
-# RayCon-SLAM — Public Trajectory Utilities
+# RayCon-SLAM · v0.1 配套工具输入与输出
 
 功能受限的外围演示：回放已给定的平面里程计增量并导出轨迹。没有图像或 IMU 输入，不执行视觉跟踪、视觉惯性初始化、地图优化或回环；不是完整 RayCon-SLAM 系统。
 

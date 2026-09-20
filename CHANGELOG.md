@@ -2,7 +2,7 @@
 
 ## v0.1.0 — 2026-09-20
 
-First versioned public preview of RayCon-SLAM.
+First public release of the RayCon-SLAM VI-SLAM project. This version opens the companion utilities.
 
 ### Added
 
@@ -14,4 +14,4 @@ First versioned public preview of RayCon-SLAM.
 
 ### Scope
 
-This release contains standalone public utilities. It does not provide an end-to-end SLAM backend. All bundled input is synthetic. The cover is concept artwork, and no benchmark claim is made.
+v0.1.0 opens the companion tools and synthetic examples. The next version is planned to introduce VI-SLAM trial-run code, example configurations and launch scripts, with a tentative December 2026 target. All bundled input in v0.1.0 is synthetic; its cover is concept artwork.
