@@ -1,48 +1,108 @@
-# RayCon-SLAM — Public Trajectory Utilities
+<p align="center">
+  <img src="docs/assets/hero-v0.1.png" alt="RayCon-SLAM v0.1.0 public preview — concept artwork" width="100%" />
+</p>
 
-功能受限的外围演示：回放已给定的平面里程计增量并导出轨迹。没有图像或 IMU 输入，不执行视觉跟踪、视觉惯性初始化、地图优化或回环；不是完整 RayCon-SLAM 系统。
+<p align="center">
+  <a href="https://github.com/Midoor98/RayCon-SLAM/releases/tag/v0.1.0"><img alt="Version v0.1.0" src="https://img.shields.io/badge/preview-v0.1.0-8b7cff?style=flat-square" /></a>
+  <img alt="C++17" src="https://img.shields.io/badge/C%2B%2B-17-4cc9f0?style=flat-square" />
+  <img alt="Python 3.10 or later" src="https://img.shields.io/badge/Python-3.10%2B-80e8cf?style=flat-square" />
+  <img alt="Synthetic examples included" src="https://img.shields.io/badge/data-synthetic-25334d?style=flat-square" />
+</p>
 
-## 运行
+<h1 align="center">RayCon-SLAM</h1>
+<p align="center"><strong>Replay. Inspect. Export.</strong><br />给定轨迹的轻量回放与检查工具</p>
+<p align="center"><a href="#quick-start">Quick start</a> · <a href="#preview">Preview</a> · <a href="#roadmap">Roadmap</a> · <a href="docs/INPUTS.md">Input formats</a> · <a href="CHANGELOG.md">Changelog</a></p>
 
-需要 Python 3.10 或更新版本，无第三方依赖。在本目录执行：
+输入已知里程计增量，获得可检查、可导出的轨迹文件。 `v0.1.0` 提供两套可以独立运行的 C++17 / Python 工具、可再生合成样例、图像预览和本地检查脚本。
+
+> **Public preview**：这是一个独立实现的通用工具预览包。当前提供已知里程计的回放与导出，不包含图像跟踪、视觉惯性估计、地图优化或回环后端。 封面是概念插画；下面的预览图来自本仓库合成数据的实际输出。
+
+## What's inside
+
+| Module | Available in v0.1.0 |
+| --- | --- |
+| Replay | 组合给定的平面里程计增量，检查时间顺序与数值有效性 |
+| Inspect | 汇总位姿数量、路径长度与时间跨度；生成合成样例预览 |
+| Export | 输出 CSV、TUM 文本和 JSON 摘要 |
+| C++ + Python | 标准库实现，无私有依赖；附两种实现的输出交叉检查 |
+
+## Quick start
+
+### C++ preview
+
+需要 C++17 编译器、CMake 3.16 及以上版本。默认构建包含检查工具，因此也需要 Python 3.10 及以上版本。
+
+```bash
+git clone https://github.com/Midoor98/RayCon-SLAM.git
+cd RayCon-SLAM
+bash run_cpp.sh
+```
+
+输出位于新的 `result/cpp-*` 目录。查看版本与参数：
+
+```bash
+./build/raycon_slam_preview --version
+./build/raycon_slam_preview --help
+```
+
+### Python preview
+
+只使用 Python 标准库，无需安装额外包：
 
 ```bash
 bash run.sh
-python3 -B -m unittest discover -s tests -v
+bash run.sh --version
 ```
 
-自定义输入：
+两个入口均可传入 `--input` 和 `--output`，指定的输出目录必须尚不存在。完整字段与坐标约定见 [Input formats](docs/INPUTS.md)。不需要 Python 的纯 C++ 构建可使用 `-DBUILD_TESTING=OFF`。
+
+## Preview
+
+![RayCon-SLAM synthetic data preview](docs/assets/demo-preview.png)
+
+121 个位姿来自程序生成的平面运动增量，图中时间是输入序列时间，不是运行耗时。 这张图不表示定位或重建精度。
+
+生成样例、运行 C++ 并重绘预览：
 
 ```bash
-python3 -B src/trajectory.py --input data/odometry.csv --output result/custom-run
+python3 scripts/make_example.py
+bash run_cpp.sh --input data/showcase_odometry.csv --output result/my-preview
+python3 -m pip install -r requirements-preview.txt
+python3 scripts/render_preview.py --input result/my-preview/trajectory.csv
 ```
 
-`--output` 指定尚不存在的目录；省略时自动创建 `result/` 下的新时间目录。
+`matplotlib` 仅用于重绘预览；普通运行与测试不依赖它。再次运行时为 `--output` 换一个新目录。封面来源与生成提示见 [Artwork](docs/ARTWORK.md)。
 
-## 数据与坐标约定
+## Roadmap
 
-`data/odometry.csv` 是手写的理想正方形行走序列，不是传感器日志或论文轨迹。列为 `timestamp,dx_body_m,dy_body_m,dyaw_rad`。
+| Target | Planned public content | Status |
+| --- | --- | --- |
+| September 2026 · v0.1.0 | C++ / Python 工具、合成数据、导出样例、预览图 | Available |
+| October 2026 | 更多合成轨迹、输入格式示例与导出说明 | Planned |
+| November 2026 | 会话统计与轻量回放视图的公开样例 | Planned |
+| **December 2026 · v0.2 preview** | **计划公开扩展输入适配器、会话报告导出和交互回放示例** | **Tentative** |
 
-- 时间戳以秒为单位，必须严格递增；样例从零秒开始，不代表真实日期。
-- 首行是初始时刻，三个增量必须为零；初始位置和航向均为零。
-- 每一后续行的平移是在上一时刻机体坐标系下表达的相邻位姿平移，单位米；不是速度，也不乘采样时长。
-- 先用上一时刻航向将平移转到世界坐标，再更新当前航向。航向增量用弧度，绕竖直轴逆时针为正。
-- 这是右手平面坐标系，水平两轴表示机体向前和向左，竖直轴向上；并非光学相机坐标系。输出高度为零。
-- 输出平移是机体原点在世界中的位置；输出四元数表示机体到世界的旋转，顺序为 `qx qy qz qw`。
+十二月是暂定目标，后续功能尚未实现或承诺交付；实际开放内容以 GitHub Release 为准。路线图仅涉及公开工具与演示，不包含研究算法的开放安排。
 
-## 实际流程与文件
+## Build & checks
 
-1. 校验首行、数值有限性和时间顺序。
-2. 组合给定平移与航向增量。
-3. 导出 CSV、TUM 文本及路径统计。
+```bash
+bash scripts/check.sh
+```
 
-| 文件 | 含义 |
-| --- | --- |
-| `src/trajectory.py` | 平面轨迹组合和命令行入口 |
-| `run.sh` | 合成数据快捷入口，可转发参数 |
-| `tests/test_trajectory.py` | 机体系平移、轨迹闭合及输入校验 |
-| `result/<运行目录>/trajectory.csv` | 带列名的逐时刻位姿 |
-| `result/<运行目录>/trajectory.tum` | `timestamp tx ty tz qx qy qz qw` 文本 |
-| `result/<运行目录>/summary.json` | 位姿数量、时间跨度、路程及末端位置统计 |
+检查涵盖 Python 单元测试、C++ Release 构建、两种实现的输出一致性、非法输入、已有结果保护以及版本标识。当前在 Ubuntu / GCC 环境核验；仓库不包含平台专属编译产物。
 
-默认样例产生 9 个位姿，路程为 8 米，末端回到起点附近，浮点误差可能留下极小非零数。这里的闭合由给定的合成增量决定，不是回环检测结果。没有真实参考轨迹，不计算 ATE 或论文精度指标。
+```text
+cpp/                 C++17 source and small CSV utilities
+src/                 Python implementation
+data/                Synthetic fixtures only
+scripts/             Checks, fixture generation and preview rendering
+tests/               Unit tests and C++/Python cross-checks
+docs/                Input reference and visual assets
+CMakeLists.txt       Standalone C++ build
+VERSION              Public preview version
+```
+
+## Feedback
+
+使用 [Issues](https://github.com/Midoor98/RayCon-SLAM/issues) 报告复现步骤、输入格式问题或公开工具的改进建议。请用合成或可公开的数据描述问题。

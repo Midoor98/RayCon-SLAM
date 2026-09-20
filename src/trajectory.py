@@ -40,6 +40,8 @@ def integrate(rows):
 def main():
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
+    version = (root / "VERSION").read_text(encoding="utf-8").strip()
+    parser.add_argument("--version", action="version", version=f"RayCon-SLAM public preview {version}")
     parser.add_argument("--input", type=Path, default=root / "data/odometry.csv")
     parser.add_argument("--output", type=Path)
     args = parser.parse_args()
@@ -47,7 +49,7 @@ def main():
         with args.input.open(newline="", encoding="utf-8") as stream:
             rows = list(csv.DictReader(stream))
         poses, distance = integrate(rows)
-        summary = {"mode": "public-demo", "backend": "given_planar_odometry_replay",
+        summary = {"version": version, "mode": "public-demo", "backend": "given_planar_odometry_replay",
                    "input_count": len(rows), "pose_count": len(poses),
                    "path_length_m": distance,
                    "duration_s": poses[-1]["timestamp"] - poses[0]["timestamp"],
